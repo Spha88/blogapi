@@ -17,7 +17,7 @@ exports.auth_login = (req, res, next) => {
             }
             // generate a signed son web token with the contents of user object and return it in the response
             const token = jwt.sign({ username: user.username, id: user._id }, process.env.PASSPORT_SECRET);
-            return res.json({ user, token });
+            return res.json({ token });
         });
     })(req, res);
 }

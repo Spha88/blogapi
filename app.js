@@ -5,18 +5,22 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
+const passport = require('passport');
 const localStrategy = require('./helpers/passportLocalStrategy');
+const jwtStrategy = require('./helpers/passportJWTStrategy');
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const blogRouter = require('./routes/blog');
 const usersRouter = require('./routes/users');
-const passport = require('passport');
+
+
 
 const app = express();
 
 // SETUP Passport
 passport.use(localStrategy);
+passport.use(jwtStrategy);
 
 // SETUP Database connection
 const mongoDB = process.env.MONGODB_URI || process.env.MONGO_DB_LOCAL;
