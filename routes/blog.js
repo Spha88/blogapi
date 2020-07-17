@@ -31,5 +31,4 @@ router.post('/:id/comment', blogController.post_blog_comment);
 // DELETE: /blogs/:id/comment/:id - delete comment
 router.delete('/:id/comment/:commentId', blogController.post_blog_comment_delete);
 
-
 module.exports = router;
