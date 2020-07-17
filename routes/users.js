@@ -11,7 +11,7 @@ router.post('/', userController.post_user);
 router.get('/:id', userController.get_user);
 
 // PUT - UPDATE USER - /user/:id
-router.put('/:id', userController.put_user);
+router.put('/:id/update', userController.put_user);
 
 // DELETE - DELETE USER - /user/:id/delete
 router.delete('/:id/delete', userController.delete_user);
