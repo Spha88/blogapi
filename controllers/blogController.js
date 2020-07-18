@@ -6,7 +6,10 @@ const { nextTick } = require('async');
 
 // GET - home page for the blog, list all posts
 exports.get_blog_posts = (req, res) => {
-    res.send('NYI: Will list blog posts');
+    Post.find((err, posts) => {
+        if (err) return res.status(500).json({ message: 'Error fetching posts.' });
+        res.status(200).json({ posts });
+    })
 }
 
 // SHOW - show a single post
@@ -80,6 +83,7 @@ exports.post_blog_comment = [
 
         comment.save(err => {
             if (err) return res.status(500).json({ message: 'Comment Not Added' });
+
             return res.status(200).json({ message: 'Comment Saved.', comment: comment });
         })
     }
