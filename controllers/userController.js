@@ -65,7 +65,7 @@ exports.post_user = [
 exports.get_user = (req, res) => {
     User.findById(req.user.id, 'first_name last_name username createdOn', (err, user) => {
         if (err) return next(err);
-        res.json({ message: 'NOT YET IMPLEMENTED: Fetch user details', user: user });
+        res.json({ user: user });
     })
 
 }
@@ -99,7 +99,11 @@ exports.put_user = [
         // find user and update
         User.findByIdAndUpdate(req.params.id, user, {}, (err, user) => {
             if (err) return next(err);
-            res.status(200).json({ message: 'User updated' })
+            if (user) {
+                res.status(200).json({ message: 'User updated', user: user })
+            } else {
+                res.status(400).json({ message: 'User not saved' });
+            }
         })
 
     }
