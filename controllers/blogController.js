@@ -66,14 +66,59 @@ exports.get_blog_post_edit = (req, res) => {
 }
 
 // UPDATE - update blog post - receives edited information - send to data base
-exports.put_blog_post = (req, res) => {
-    res.send('NYI: update blog post');
-}
+exports.put_blog_post = [
+    body('title', 'Title empty').trim().isLength({ min: 1 }),
+    body('body', 'Post body empty').trim().isLength({ min: 1 }),
+    body('author', 'Author not included').trim().isLength({ min: 1 }),
+
+    body('*').escape(),
+
+    // Process request
+    (req, res, next) => {
+        // create user
+        const post = new Post({
+            _id: req.params.id,
+            title: req.body.title,
+            body: req.body.body,
+            published: req.body.published ? true : false,
+            author: req.body.author
+        })
+
+        const results = validationResult(req);
+
+        // check validation errors
+        if (!results.isEmpty()) return res.json({ error: results.errors });
+
+
+        // find user and update
+        Post.findByIdAndUpdate(req.params.id, post, {}, (err, user) => {
+            if (err) return next(err);
+            if (user) {
+                res.status(200).json({ message: 'Blog post updated.', user: user })
+            } else {
+                res.status(400).json({ message: 'User not saved' });
+            }
+        })
+
+    }
+]
 
 // DELETE - delete blog post
 exports.delete_blog_post = (req, res) => {
-    res.send('NYI: delete blog post');
+    async.parallel({
+        post: callback => Post.findOneAndDelete({ _id: req.params.id }, callback),
+        comments: callback => Comment.deleteMany({ post: req.params.id }, callback)
+    }, (err, results) => {
+        if (err) return res.status(400).json({ message: 'could not delete post', errors: err });
+
+        if (results.post == null) {
+            return res.status(400).json({ message: 'Post does not exist' });
+        }
+
+        res.status(200).json({ message: 'Post and comments deleted', post: results.post, comments: results.comments })
+    })
 }
+
 /**============================================================== */
 
 /** COMMENTS CONTROLLERS */
