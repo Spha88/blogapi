@@ -27,5 +27,5 @@ exports.auth_login = (req, res, next) => {
 }
 
 exports.auth_logout = (req, res) => {
-    res.json({ message: 'This is will use passport local strategy once set up' })
+    res.json({ message: 'I Will implement this on the client then later on the DB' });
 }

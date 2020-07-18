@@ -5,7 +5,7 @@ const router = express.Router();
 /** BOG ROUTES */
 
 /** POSTS */
-// GET: /blog - list of blog posts
+// GET: /blogs - list of blog posts
 router.get('/', blogController.get_blog_posts);
 
 // POST - CREATE: /blogs - handles new post data

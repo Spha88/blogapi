@@ -1,4 +1,7 @@
-
+const { body, validationResult } = require('express-validator');
+const Post = require('../models/postModel');
+const e = require('express');
+const { nextTick } = require('async');
 
 // GET - home page for the blog, list all posts
 exports.get_blog_posts = (req, res) => {
@@ -11,9 +14,34 @@ exports.get_blog_post = (req, res) => {
 }
 
 // CREATE - new blog post
-exports.post_blog = (req, res) => {
-    res.send('NYI: Will handle a new post form');
-}
+exports.post_blog = [
+    body('title', 'Title empty').trim().isLength({ min: 1 }),
+    body('body', 'Post body empty').trim().isLength({ min: 1 }),
+    body('author', 'Author not included').trim().isLength({ min: 1 }),
+
+    body('*').escape(),
+
+    (req, res, next) => {
+        const validationResults = validationResult(req);
+
+        const post = new Post({
+            title: req.body.title,
+            body: req.body.body,
+            published: req.body.published ? true : false,
+            author: req.body.author
+        })
+
+        // check for validation errors
+        if (validationResults.errors.length) {
+            res.status(400).json({ errors: validationResults.errors });
+        }
+
+        post.save(err => {
+            if (err) return next(err);
+            res.status(200).json({ message: 'Blog post save.' });
+        })
+    }
+]
 
 // EDIT - fetch post data and send it to client for editing
 exports.get_blog_post_edit = (req, res) => {

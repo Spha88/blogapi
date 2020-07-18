@@ -20,4 +20,4 @@ postSchema.virtual('dateFormatted')
         return moment(this.date).format('a, ddd DD MMMM, YYYY');
     })
 
-module.exports = mongoose.model('Message', postSchema);
+module.exports = mongoose.model('Post', postSchema);
