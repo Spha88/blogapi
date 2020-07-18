@@ -55,7 +55,14 @@ exports.post_blog = [
 
 // EDIT - fetch post data and send it to client for editing
 exports.get_blog_post_edit = (req, res) => {
-    res.send('NYI: edit single post');
+    Post.findById(req.params.id).populate('author', 'first_name last_name').exec((err, post) => {
+        if (err) return res.status(400).json({ message: 'Error fetching post' });
+        if (!post) {
+            res.status(400).json({ message: 'Post not found' })
+        } else {
+            res.status(200).json({ post });
+        }
+    })
 }
 
 // UPDATE - update blog post - receives edited information - send to data base
