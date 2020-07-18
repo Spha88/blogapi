@@ -16,7 +16,11 @@ exports.auth_login = (req, res, next) => {
                 res.send(err);
             }
             // generate a signed son web token with the contents of user object and return it in the response
-            const token = jwt.sign({ username: user.username, id: user._id }, process.env.PASSPORT_SECRET);
+            const payload = {
+                username: user.username,
+                id: user._id
+            }
+            const token = jwt.sign(payload, process.env.PASSPORT_SECRET, { expiresIn: '10h' });
             return res.json({ token });
         });
     })(req, res);
