@@ -1,5 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const Post = require('../models/postModel');
+const Comment = require('../models/commentsModel');
 const e = require('express');
 const { nextTick } = require('async');
 
@@ -57,12 +58,32 @@ exports.put_blog_post = (req, res) => {
 exports.delete_blog_post = (req, res) => {
     res.send('NYI: delete blog post');
 }
+/**============================================================== */
 
 /** COMMENTS CONTROLLERS */
 // POST CREATE: Create new comment for a post
-exports.post_blog_comment = (req, res) => {
-    res.send('NYI: Create new comment for post ' + req.params.id);
-}
+exports.post_blog_comment = [
+    body('author', 'Author empty.').trim().isLength({ min: 1 }),
+    body('body', 'Comment body empty.').trim().isLength({ min: 1 }),
+    body('*').escape(),
+    (req, res, next) => {
+        const validationResults = validationResult(req);
+        const comment = new Comment({
+            author: req.body.author,
+            post: req.body.post,
+            body: req.body.body
+        })
+
+        if (validationResults.errors.length) {
+            return res.status(400).json({ message: 'Validation errors', errors: validationResults.errors });
+        }
+
+        comment.save(err => {
+            if (err) return res.status(500).json({ message: 'Comment Not Added' });
+            return res.status(200).json({ message: 'Comment Saved.', comment: comment });
+        })
+    }
+]
 
 // DELETE: Delete comment
 exports.post_blog_comment_delete = (req, res) => {
