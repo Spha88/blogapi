@@ -1,8 +1,7 @@
 const { body, validationResult } = require('express-validator');
+const async = require('async');
 const Post = require('../models/postModel');
 const Comment = require('../models/commentsModel');
-const e = require('express');
-const { nextTick } = require('async');
 
 // GET - home page for the blog, list all posts
 exports.get_blog_posts = (req, res) => {
@@ -14,7 +13,14 @@ exports.get_blog_posts = (req, res) => {
 
 // SHOW - show a single post
 exports.get_blog_post = (req, res) => {
-    res.send('NYI: Show single post');
+    async.parallel({
+        post: callback => Post.findById(req.params.id, callback),
+        comments: callback => Comment.find({ post: req.params.id }, callback)
+
+    }, (err, results) => {
+        if (err) return res.status(400).json({ message: 'Error fetching post' })
+        res.status(200).json({ post: results.post, comments: results.comments });
+    })
 }
 
 // CREATE - new blog post
