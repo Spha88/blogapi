@@ -149,6 +149,14 @@ exports.post_blog_comment = [
 
 // DELETE: Delete comment
 exports.post_blog_comment_delete = (req, res) => {
-    res.send(`NYI: Delete comment ${req.params.commentId} for post ${req.params.id}`);
+    Comment.findOneAndDelete({ _id: req.params.commentId }, (err, comment) => {
+        if (err) return res.status(400).json({ message: 'Error deleting comment.', error: err });
+
+        // check if there's a comment delete
+        if (!comment) return res.status(400).json({ message: 'Comment not in database', comment: comment });
+
+        // comment was deleted
+        res.status(200).json({ message: 'Comment deleted', comment: comment });
+    })
 }
 
