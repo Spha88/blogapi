@@ -8,6 +8,9 @@ const router = express.Router();
 // GET: /blogs - list of blog posts
 router.get('/', blogController.get_blog_posts);
 
+// GET: /blogs - list for a specif user
+router.get('/user/:id', blogController.get_blog_post_for_user);
+
 // POST - CREATE: /blogs - handles new post data
 router.post('/', blogController.post_blog);
 

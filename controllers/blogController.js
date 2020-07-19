@@ -10,16 +10,23 @@ exports.get_blog_posts = (req, res) => {
         res.status(200).json({ posts });
     })
 }
+// GET - Get blog posts for a specific user
+exports.get_blog_post_for_user = (req, res) => {
+    Post.find({ author: req.params.id }).populate('author', 'first_name last_name').exec((err, posts) => {
+        if (err) return res.status(400).json({ message: 'Error fetching user posts' });
+        res.status(200).json({ posts })
+    })
+}
 
 // SHOW - show a single post
 exports.get_blog_post = (req, res) => {
     async.parallel({
-        post: callback => Post.findById(req.params.id, callback),
-        comments: callback => Comment.find({ post: req.params.id }, callback)
+        post: callback => Post.findById(req.params.id).populate('author', 'first_name last_name').exec(callback),
+        comments: callback => Comment.find({ post: req.params.id }).exec(callback)
 
     }, (err, results) => {
         if (err) return res.status(400).json({ message: 'Error fetching post' })
-        res.status(200).json({ post: results.post, comments: results.comments });
+        res.status(200).json({ post: { details: results.post, comments: results.comments } });
     })
 }
 
@@ -27,15 +34,19 @@ exports.get_blog_post = (req, res) => {
 exports.post_blog = [
     body('title', 'Title empty').trim().isLength({ min: 1 }),
     body('body', 'Post body empty').trim().isLength({ min: 1 }),
+    body('imageUrl', 'imageUrl invalid').trim().isLength({ min: 1 }).isURL(),
     body('author', 'Author not included').trim().isLength({ min: 1 }),
 
-    body('*').escape(),
+    body('title').escape(),
+    body('body').escape(),
+    body('author').escape(),
 
     (req, res, next) => {
         const validationResults = validationResult(req);
 
         const post = new Post({
             title: req.body.title,
+            imageUrl: req.body.imageUrl,
             body: req.body.body,
             published: req.body.published ? true : false,
             author: req.body.author
@@ -140,7 +151,7 @@ exports.post_blog_comment = [
         }
 
         comment.save(err => {
-            if (err) return res.status(500).json({ message: 'Comment Not Added' });
+            if (err) return res.status(500).json({ message: 'Comment Not Added', error: err });
 
             return res.status(200).json({ message: 'Comment Saved.', comment: comment });
         })

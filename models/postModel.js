@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const postSchema = new Schema({
     title: { type: String, minlength: 1, maxlength: 300, required: true },
-    body: { type: String, minlength: 1, maxlength: 1000, required: true },
+    imageUrl: { type: String, required: true },
+    body: { type: String, minlength: 1, maxlength: 5000, required: true },
     date: { type: Date, default: Date.now() },
     author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     published: { type: Boolean, default: true }

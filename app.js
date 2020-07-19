@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const cors = require('cors');
 
 const passport = require('passport');
 const localStrategy = require('./helpers/passportLocalStrategy');
@@ -17,6 +18,8 @@ const usersRouter = require('./routes/users');
 
 
 const app = express();
+
+app.use(cors());
 
 // SETUP Passport
 passport.use(localStrategy);

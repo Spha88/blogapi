@@ -5,23 +5,27 @@ const passport = require('passport');
 exports.auth_login = (req, res, next) => {
     passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err || !user) {
-            return res.status(400).json({
-                message: 'username or password incorrect',
-                user: user
-            });
+            return res.status(400).json({ message: 'username or password incorrect' });
         }
 
         req.login(user, { session: false }, (err) => {
             if (err) {
                 res.send(err);
             }
-            // generate a signed son web token with the contents of user object and return it in the response
-            const payload = {
+
+            const userDetails = { // Send user details to client (not sensitive data)
+                first_name: user.first_name,
+                last_name: user.last_name,
+                username: user.username
+            }
+
+            const payload = { // store these details of the user in the token
                 username: user.username,
                 id: user._id
             }
+            // generate a signed son web token with the contents of user object and return it in the response
             const token = jwt.sign(payload, process.env.PASSPORT_SECRET, { expiresIn: '10h' });
-            return res.json({ token });
+            return res.json({ token, user: userDetails });
         });
     })(req, res);
 }
