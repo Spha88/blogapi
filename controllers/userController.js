@@ -63,11 +63,10 @@ exports.post_user = [
 
 // GET - FETCH USER DATA: fetch user data to be edited 
 exports.get_user = (req, res) => {
-    User.findById(req.user.id, 'first_name last_name username createdOn', (err, user) => {
+    User.findById(req.user.id, 'first_name last_name username imageUrl bio createdOn', (err, user) => {
         if (err) return next(err);
         res.json({ user: user });
     })
-
 }
 
 // PUT - UPDATE USER: update user info
@@ -76,9 +75,14 @@ exports.put_user = [
     body('first_name', 'First name must not be empty').trim().isLength({ min: 1 }),
     body('last_name', 'Last name must not be empty').trim().isLength({ min: 1 }),
     body('username', 'Username must not be empty').trim().isLength({ min: 1 }),
+    body('imageUrl', 'Enter an image url').trim().isLength({ min: 1 }),
+    body('bio', 'bio should not be empty').trim().isLength({ min: 1 }),
 
     // Sanitize
-    body('*').escape(),
+    body('first_name').escape(),
+    body('last_name').escape(),
+    body('username').escape(),
+    body('bio').escape(),
 
     // Process request
     (req, res, next) => {
@@ -88,6 +92,8 @@ exports.put_user = [
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             username: req.body.username,
+            imageUrl: req.body.imageUrl,
+            bio: req.body.bio
         })
 
         const results = validationResult(req);
@@ -97,7 +103,7 @@ exports.put_user = [
 
 
         // find user and update
-        User.findByIdAndUpdate(req.params.id, user, {}, (err, user) => {
+        User.findByIdAndUpdate(req.params.id, user, { new: true, select: '-password' }, (err, user) => {
             if (err) return next(err);
             if (user) {
                 res.status(200).json({ message: 'User updated', user: user })

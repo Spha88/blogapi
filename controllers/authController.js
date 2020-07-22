@@ -16,6 +16,9 @@ exports.auth_login = (req, res, next) => {
             const userDetails = { // Send user details to client (not sensitive data)
                 first_name: user.first_name,
                 last_name: user.last_name,
+                bio: user.bio,
+                imageUrl: user.imageUrl,
+                _id: user._id,
                 username: user.username
             }
 

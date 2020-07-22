@@ -1,27 +1,31 @@
 const { body, validationResult } = require('express-validator');
 const async = require('async');
 const Post = require('../models/postModel');
+const User = require('../models/userModel');
 const Comment = require('../models/commentsModel');
 
 // GET - home page for the blog, list all posts
 exports.get_blog_posts = (req, res) => {
-    Post.find((err, posts) => {
-        if (err) return res.status(500).json({ message: 'Error fetching posts.' });
+    Post.find({ 'published': 'true' }).sort([['date', -1]]).exec((err, posts) => {
+        if (err) return res.status(500).json({ message: 'Error fetching posts.', error: err.message });
         res.status(200).json({ posts });
     })
 }
 // GET - Get blog posts for a specific user
 exports.get_blog_post_for_user = (req, res) => {
-    Post.find({ author: req.params.id }).populate('author', 'first_name last_name').exec((err, posts) => {
-        if (err) return res.status(400).json({ message: 'Error fetching user posts' });
-        res.status(200).json({ posts })
+    async.parallel({
+        user: callback => User.findById(req.params.id).exec(callback),
+        posts: callback => Post.find({ author: req.params.id }).populate('author', 'first_name last_name').exec(callback)
+    }, (err, results) => {
+        if (err) return res.status(400).json({ message: 'Error user and posts' });
+        res.status(200).json({ user: results.user, posts: results.posts });
     })
 }
 
 // SHOW - show a single post
 exports.get_blog_post = (req, res) => {
     async.parallel({
-        post: callback => Post.findById(req.params.id).populate('author', 'first_name last_name').exec(callback),
+        post: callback => Post.findById(req.params.id).populate('author', '-password').exec(callback),
         comments: callback => Comment.find({ post: req.params.id }).exec(callback)
 
     }, (err, results) => {
@@ -36,6 +40,7 @@ exports.post_blog = [
     body('body', 'Post body empty').trim().isLength({ min: 1 }),
     body('imageUrl', 'imageUrl invalid').trim().isLength({ min: 1 }).isURL(),
     body('author', 'Author not included').trim().isLength({ min: 1 }),
+    body('published', 'Published value forbidden').isBoolean(),
 
     body('title').escape(),
     body('body').escape(),
@@ -54,12 +59,12 @@ exports.post_blog = [
 
         // check for validation errors
         if (validationResults.errors.length) {
-            res.status(400).json({ errors: validationResults.errors });
+            return res.status(400).json({ errors: validationResults.errors });
         }
 
-        post.save(err => {
+        post.save((err, doc) => {
             if (err) return next(err);
-            res.status(200).json({ message: 'Blog post save.' });
+            res.status(200).json({ message: 'Blog post saved.', post: doc });
         })
     }
 ]
@@ -142,7 +147,7 @@ exports.post_blog_comment = [
         const validationResults = validationResult(req);
         const comment = new Comment({
             author: req.body.author,
-            post: req.body.post,
+            post: req.params.id,
             body: req.body.body
         })
 
