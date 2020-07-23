@@ -6,7 +6,7 @@ const Comment = require('../models/commentsModel');
 
 // GET - home page for the blog, list all posts
 exports.get_blog_posts = (req, res) => {
-    Post.find({ 'published': 'true' }).sort([['date', -1]]).exec((err, posts) => {
+    Post.find({ 'published': 'true' }).sort([['date', 'descending']]).exec((err, posts) => {
         if (err) return res.status(500).json({ message: 'Error fetching posts.', error: err.message });
         res.status(200).json({ posts });
     })
@@ -26,10 +26,10 @@ exports.get_blog_post_for_user = (req, res) => {
 exports.get_blog_post = (req, res) => {
     async.parallel({
         post: callback => Post.findById(req.params.id).populate('author', '-password').exec(callback),
-        comments: callback => Comment.find({ post: req.params.id }).exec(callback)
+        comments: callback => Comment.find({ post: req.params.id }).populate('author', '-password').exec(callback)
 
     }, (err, results) => {
-        if (err) return res.status(400).json({ message: 'Error fetching post' })
+        if (err) return res.status(400).json({ message: 'Error fetching post', error: err })
         res.status(200).json({ post: { details: results.post, comments: results.comments } });
     })
 }
@@ -85,9 +85,10 @@ exports.get_blog_post_edit = (req, res) => {
 exports.put_blog_post = [
     body('title', 'Title empty').trim().isLength({ min: 1 }),
     body('body', 'Post body empty').trim().isLength({ min: 1 }),
-    body('author', 'Author not included').trim().isLength({ min: 1 }),
+    body('imageUrl', 'Incorrect image url').trim().isURL(),
 
-    body('*').escape(),
+    body('title').escape(),
+    body('body').escape(),
 
     // Process request
     (req, res, next) => {
@@ -97,7 +98,7 @@ exports.put_blog_post = [
             title: req.body.title,
             body: req.body.body,
             published: req.body.published ? true : false,
-            author: req.body.author
+            imageUrl: req.body.imageUrl
         })
 
         const results = validationResult(req);
@@ -142,7 +143,7 @@ exports.delete_blog_post = (req, res) => {
 exports.post_blog_comment = [
     body('author', 'Author empty.').trim().isLength({ min: 1 }),
     body('body', 'Comment body empty.').trim().isLength({ min: 1 }),
-    body('*').escape(),
+    body('body').escape(),
     (req, res, next) => {
         const validationResults = validationResult(req);
         const comment = new Comment({

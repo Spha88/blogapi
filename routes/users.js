@@ -9,13 +9,15 @@ const passport = require('passport');
 // POST - CREATE USER - /user
 router.post('/', userController.post_user);
 
+router.use(passport.authenticate('jwt', { session: false }));
+
 // GET - GET USER - /user/:id
-router.get('/:id', passport.authenticate('jwt', { session: false }), userController.get_user);
+router.get('/:id', userController.get_user);
 
 // PUT - UPDATE USER - /user/:id
-router.put('/:id/update', passport.authenticate('jwt', { session: false }), userController.put_user);
+router.put('/:id/update', userController.put_user);
 
 // DELETE - DELETE USER - /user/:id/delete
-router.delete('/:id/delete', passport.authenticate('jwt', { session: false }), userController.delete_user);
+router.delete('/:id/delete', userController.delete_user);
 
 module.exports = router;

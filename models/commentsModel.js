@@ -3,7 +3,7 @@ const moment = require('moment');
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema({
-    author: { type: String, minlength: 1, maxlength: 500, required: true },
+    author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     post: { type: Schema.Types.ObjectId, ref: 'Post', required: true },
     body: { type: String, minlength: 1, maxlength: 3000, required: true },
     date: { type: Date, default: Date.now() }
