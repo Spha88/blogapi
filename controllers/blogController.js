@@ -42,9 +42,9 @@ exports.post_blog = [
     body('author', 'Author not included').trim().isLength({ min: 1 }),
     body('published', 'Published value forbidden').isBoolean(),
 
-    body('title').escape(),
-    body('body').escape(),
-    body('author').escape(),
+    // body('title').escape(),
+    // body('body').escape(),
+    // body('author').escape(),
 
     (req, res, next) => {
         const validationResults = validationResult(req);
@@ -87,8 +87,8 @@ exports.put_blog_post = [
     body('body', 'Post body empty').trim().isLength({ min: 1 }),
     body('imageUrl', 'Incorrect image url').trim().isURL(),
 
-    body('title').escape(),
-    body('body').escape(),
+    // body('title').escape(),
+    // body('body').escape(),
 
     // Process request
     (req, res, next) => {
@@ -143,7 +143,6 @@ exports.delete_blog_post = (req, res) => {
 exports.post_blog_comment = [
     body('author', 'Author empty.').trim().isLength({ min: 1 }),
     body('body', 'Comment body empty.').trim().isLength({ min: 1 }),
-    body('body').escape(),
     (req, res, next) => {
         const validationResults = validationResult(req);
         const comment = new Comment({
