@@ -82,7 +82,7 @@ exports.put_user = [
     body('first_name').escape(),
     body('last_name').escape(),
     body('username').escape(),
-    body('bio').escape(),
+    // body('bio').escape(),
 
     // Process request
     (req, res, next) => {
